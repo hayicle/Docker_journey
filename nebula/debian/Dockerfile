@@ -115,6 +115,7 @@ RUN chmod 750 /home/flag10/flag10 \
 COPY src/flag11/ /home/flag11/
 RUN chmod 750 /home/flag11/flag11 \
 	&& chown flag11:level11 /home/flag11/flag11 \
+	&& mkdir -p /home/flag11/.ssh \
 	&& chown -R flag11:flag11 /home/flag11/.ssh
 #level12
 RUN apt-get install -y lua50
