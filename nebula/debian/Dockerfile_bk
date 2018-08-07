@@ -1,0 +1,259 @@
+FROM ubuntu:16.10
+
+# Supervisor, Cron & Mysql client & pwgen & openssh-server & vim
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends wget cron supervisor gnupg apt-transport-https ca-certificates mysql-client pwgen openssh-server vim man\
+    && rm -f /etc/cron.*/*
+#Strace, ltrace compiler
+RUN apt-get install -y strace ltrace gdb gcc
+
+#Run 32bit application
+#https://askubuntu.com/questions/454253/how-to-run-32-bit-app-in-ubuntu-64-bit
+
+RUN dpkg --add-architecture i386 \
+	&& apt-get update \
+	&& apt-get install -y libc6:i386 libncurses5:i386 libstdc++6:i386 multiarch-support gcc-multilib
+
+
+#Prepare
+COPY script /script/
+COPY src/.bashrc /script/
+#Description of challege
+COPY script/motd_information_challenge.sh /etc/profile.d/
+COPY script/color.sh /etc/profile.d/
+
+#For quick interaction alias 
+COPY script/alias.sh /etc/profile.d/
+
+#Script
+RUN bash /script/user_add.sh
+
+#bashrc color
+COPY src/level00/.bashrc /root 
+RUN echo "source /etc/profile.d/*"  >> /root/.bashrc \
+	&& echo "ps -fauxww | grep ^level* | awk '{print $2}' | xargs kill" >> /root/.bashrc
+
+#SUID permission set for all challenge
+RUN /script/permission.sh
+
+
+#Level00
+COPY src/level00/.bashrc /home/level00
+RUN echo "cd /home/flag00" >> /home/level00/.bashrc \
+	&& echo "/script/Hint_auto.sh & \n" >> /home/level00/.bashrc
+
+RUN mkdir -p /rofs/bin/... 
+COPY src/level00/flag00 /rofs/bin/.../
+RUN chmod 750 /rofs/bin/.../flag00 \
+	&& chown flag00:level00 /rofs/bin/.../flag00
+
+#level1
+COPY src/level01/.bashrc /home/level01
+RUN echo "cd /home/flag01" >> /home/level01/.bashrc\
+	&& echo "/script/Hint_auto.sh & \n" >> /home/level01/.bashrc
+
+COPY src/flag01/flag01 /home/flag01/flag01
+RUN chmod 750 /home/flag01/flag01 \
+	&& chown flag01:level01 /home/flag01/flag01
+
+#level2
+COPY src/level02/.bashrc /home/level02
+RUN echo "cd /home/flag02" >> /home/level02/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level02/.bashrc
+
+COPY src/flag02/flag02 /home/flag02/flag02
+RUN chmod 750 /home/flag02/flag02 \
+	&& chown flag02:level02 /home/flag02/flag02
+
+#level3
+COPY src/level03/.bashrc /home/level03
+RUN echo "cd /home/flag03" >> /home/level03/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level03/.bashrc
+
+COPY src/flag03/writable.sh /home/flag03/
+RUN mkdir -p /home/flag03/writable.d
+#Crontab
+COPY src/level03/flag03 /var/spool/cron/crontabs/
+RUN chmod 777 /home/flag03/writable.d \
+	&& chmod 755 /home/flag03/writable.sh \
+	&& chown flag03:crontab /var/spool/cron/crontabs/flag03
+
+#level4
+COPY src/level04/.bashrc /home/level04
+RUN echo "cd /home/flag04" >> /home/level04/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level04/.bashrc
+
+COPY src/flag04/ /home/flag04/
+RUN chmod 750 /home/flag04/flag04 \
+	&& chmod 600 /home/flag04/token \
+	&& chown flag04:level04 /home/flag04/flag04 \
+	&& chown flag04: /home/flag04/token
+
+#level5
+COPY src/level05/.bashrc /home/level05
+RUN echo "cd /home/flag05" >> /home/level05/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level05/.bashrc
+
+COPY src/flag05/.backup /home/flag05/.backup
+COPY src/flag05/.ssh /home/flag05/.ssh
+RUN chmod 755 /home/flag05/.backup \
+	&& chmod 700 /home/flag05/.ssh	\
+	&& chown -R flag05: /home/flag05/
+
+#level6 : 
+COPY src/level06/.bashrc /home/level06
+RUN echo "cd /home/flag06" >> /home/level06/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level06/.bashrc
+
+RUN apt-get install -y john openssh-server
+#Already add in script/user_add.sh
+
+#level7 : WEB THTTPD
+COPY src/level07/.bashrc /home/level07
+RUN echo "cd /home/flag07" >> /home/level07/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level07/.bashrc
+
+RUN apt-get install -y git gcc make net-tools
+RUN groupadd www \
+	&& mkdir -p /usr/local/man/man1/ 
+RUN git clone https://github.com/wlangstroth/thttpd /git/thttpd \
+	&& cd /git/thttpd \
+	&& ./configure \
+	&& make \
+	&& make install 
+
+COPY src/flag07/ /home/flag07/
+RUN chmod 644 /home/flag07/thttpd.conf \
+	&& chmod 755 /home/flag07/index.cgi \
+	&& chown root:	/home/flag07/thttpd.conf\
+	&& chown root: /home/flag07/index.cgi
+
+#level8 : PCAPFILE
+COPY src/level08/.bashrc /home/level08
+RUN echo "cd /home/flag08" >> /home/level08/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level08/.bashrc
+
+COPY src/flag08/ /home/flag08/
+
+RUN apt-get install -y tcpflow bsdmainutils \
+	&& chmod 644 /home/flag08/capture.pcap \
+	&& chown root: /home/flag08/capture.pcap
+
+#level9
+COPY src/level09/.bashrc /home/level09
+RUN echo "cd /home/flag09" >> /home/level09/.bashrc\
+	&& echo "/script/Hint_auto.sh & \n" >> /home/level09/.bashrc
+
+RUN apt-get install -y php5
+COPY src/flag09/ /home/flag09/
+RUN chmod 750 /home/flag09/flag09 \
+	&& chmod 644 /home/flag09/flag09.php \
+	&& chown flag09:level09 /home/flag09/flag09 \
+	&& chown root: /home/flag09/flag09.php
+
+#level10
+COPY src/level10/.bashrc /home/level10
+RUN echo "cd /home/flag10" >> /home/level10/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level10/.bashrc
+
+COPY src/flag10/ /home/flag10/
+RUN chmod 750 /home/flag10/flag10 \
+	&& chmod 600 /home/flag10/token \
+	&& chown flag10:level10 /home/flag10/flag10 \
+	&& chown flag10: /home/flag10/token
+
+#level11
+COPY src/level11/.bashrc /home/level11
+RUN echo "cd /home/flag11" >> /home/level11/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level11/.bashrc
+
+COPY src/flag11/ /home/flag11/
+RUN chmod 750 /home/flag11/flag11 \
+	&& chown flag11:level11 /home/flag11/flag11 \
+	&& chown -R flag11:flag11 /home/flag11/.ssh
+
+#level12
+COPY src/level12/.bashrc /home/level12
+RUN echo "cd /home/flag12" >> /home/level12/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level12/.bashrc
+
+RUN apt-get install -y lua50
+COPY src/flag12/ /home/flag12/
+RUN chmod 644 /home/flag12/flag12.lua \
+	&& chown root: /home/flag12/flag12.lua
+
+#level13
+COPY src/level13/.bashrc /home/level13
+RUN echo "cd /home/flag13" >> /home/level13/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level13/.bashrc
+
+COPY src/flag13/ /home/flag13/
+RUN chmod 750 /home/flag13/flag13 \
+	&& chown flag13: /home/flag13/flag13
+
+#level14
+COPY src/level14/.bashrc /home/level14
+RUN echo "cd /home/flag14" >> /home/level14/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level14/.bashrc
+
+COPY src/flag14/ /home/flag14/
+RUN chmod 750 /home/flag14/flag14 \
+	&& chown flag14: /home/flag14/flag14
+
+#level15
+COPY src/level15/.bashrc /home/level15
+RUN echo "cd /home/flag15" >> /home/level15/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level15/.bashrc
+
+COPY src/flag15/ /home/flag15/
+RUN chmod 750 /home/flag15/flag15 \ 
+	&& chown flag15:level15 /home/flag15/flag15
+
+#level16
+COPY src/level16/.bashrc /home/level16
+RUN echo "cd /home/flag16" >> /home/level16/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level16/.bashrc
+
+COPY src/flag16/ /home/flag16/
+RUN chmod 755 /home/flag16/index.cgi \
+	&& chmod 644 /home/flag16/userdb.txt \
+	&& chmod 644 /home/flag16/thttpd.conf \
+	&& chown root: /home/flag16/*
+
+#level17
+COPY src/level17/.bashrc /home/level17
+RUN echo "cd /home/flag17" >> /home/level17/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level17/.bashrc
+
+COPY src/flag17/ /home/flag17
+RUN chmod 644 /home/flag17/flag17.py \
+	&& chown root: /home/flag17/flag17.py
+
+#level18
+COPY src/level18/.bashrc /home/level18
+RUN echo "cd /home/flag18" >> /home/level18/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level18/.bashrc
+
+COPY src/flag18 /home/flag18
+RUN chmod 750 /home/flag18/flag18 \
+	&& chmod 600 /home/flag18/password \
+	&& chown flag18:level18 /home/flag18/flag18 \
+	&& chown flag18: /home/flag18/password
+
+#level19
+COPY src/level19/.bashrc /home/level19
+RUN echo "cd /home/flag19" >> /home/level19/.bashrc\
+    && echo "/script/Hint_auto.sh & \n" >> /home/level19/.bashrc
+
+COPY src/flag19/ /home/flag19
+RUN chmod 750 /home/flag19/flag19 \
+	&& chown flag19:level19 /home/flag19/flag19
+
+# Copy configuration
+COPY script/run.sh /
+COPY supervisor.d/* /etc/supervisor/conf.d/
+
+
+
+CMD ["/run.sh"]
+

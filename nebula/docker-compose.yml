@@ -1,0 +1,22 @@
+version: '3'
+services:
+  nebula:
+    build: debian
+    #useless by docker accept some sysctls and not all
+    #    sysctls: 
+      #      - fs.protected_symlinks=1
+    environment:
+      TERM:
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.113.7/24
+volumes:
+  data-volume:
