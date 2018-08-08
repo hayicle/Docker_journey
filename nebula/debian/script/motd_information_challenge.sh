@@ -74,7 +74,7 @@ case `whoami` in
 	level00)
 
 		echo -e " \n$Yellow $Blink \t\t\t -----------------[WARNING]--------------- $reset"
-		echo -e "$Red About \n $Dark_Gray $level01 $No_color"
+		echo -e "$Red About \n $Dark_Gray $level00 $No_color"
 		echo -e " \n$Yellow $Blink \t\t\t ----------------------------------------- $reset";;
 	level01)
 		echo -e " \n$Yellow $Blink \t\t\t -----------------[WARNING]--------------- $reset"
