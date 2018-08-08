@@ -7,7 +7,7 @@ do
 	chown flag$x: /home/flag$x/write_up
 	#enable color for user 10 -> 19
 	echo "#enable color for current user" >> home/level$x/.bashrc
-	echo "patch -f /home/level$x/.bashrc /script/bashrc_enable_color.patch & > /tmp/garbage" >> /root/.bashrc
+	echo "patch -f /home/level$x/.bashrc /script/bashrc_enable_color.patch > /tmp/garbage" >> /root/.bashrc
 	#hint automatically
 	echo "#Hint automatically" >> /home/level$x/.bashrc
 	echo "/script/Hint_auto.sh &" >> /home/level$x/.bashrc
@@ -30,7 +30,7 @@ do
 	chown flag0$x /home/flag0$x/write_up
 	#enable bash color for user 0->9
 	echo "#enable color for current user" >> /home/level0$x/.bashrc
-	echo "patch -f /home/level0$x/.bashrc /script/bashrc_enable_color.patch & > /tmp/garbage" >> /root/.bashrc
+	echo "patch -f /home/level0$x/.bashrc /script/bashrc_enable_color.patch > /tmp/garbage" >> /root/.bashrc
 	#hint automatically
 	echo "#Hint automatically" >> /home/level0$x/.bashrc
 	echo "/script/Hint_auto.sh &" >> /home/level0$x/.bashrc
